@@ -1,0 +1,103 @@
+from Myro import*
+import time
+import starfleetcom
+import json
+
+
+def checkWall():
+    
+    while True:
+        forward(1)
+        l,r=getIR()
+        if l==0 or r==0:
+            stop()
+            
+            turnBy(90)
+            break
+        L1,R1=getLine()
+        if L1==1 or R1==1:
+            stop()
+            backward(0.5,1)
+            turnBy(90)
+            break
+checkWall()
+  
+
+def Cruise():
+    startTime=time.time()      
+    l,r=getIR()
+    while True:    
+        forward(1)   
+        l,r=getIR()   
+        if l==0 or r==0:
+            stop()
+            #backward(0.5,1)
+            turnBy(90)
+            startTime=time.time()
+        
+        l1,r1=getLine()
+        if l1==1 or r1==1:
+            stop()
+            backward(0.5,1)
+            turnBy(90)
+            startTime=time.time()
+            
+        l2,c2,r2=getLight()
+        if l2<60000 or c2<60000 or r2<60000:
+            stop()
+            speak("light sensed, taking picture of moob")
+            turnBy(180)
+            pic=takePicture("color")
+            show(pic)
+            savePicture(pic,"room_movie.jpg")
+            starfleetcom.deleteCommand('http://localhost:8080/robot')
+            starfleetcom.postImage('http://localhost:8080/robot',"room_movie.jpg")
+            time.sleep(30)
+            code = json.loads(starfleetcom.getCommand('http://localhost:8080/robot'))
+            speak(code["order"])
+            #time.sleep(30)
+            #speak("hello")
+            turnBy(180)
+            
+            startTime=time.time()
+            break
+            
+        if time.time()-startTime>2:
+            stop()
+            turnBy(-90)
+            startTime=time.time()
+       
+Cruise()
+
+def Communication():
+    startTime=time.time()
+    while True:
+        forward(1)
+        l1,r1=getLine()
+        if l1==1 or r1==1:
+            stop()
+            backward(0.5,1)
+            turnBy(90)
+            startTime=time.time()
+        l,r=getIR()
+        if l==0 or r==0:
+            stop()
+            speak("Sample detected, taking picture")
+            pic=takePicture("color")
+            show(pic)
+            savePicture(pic,"room_movie.jpg")
+            starfleetcom.deleteCommand('http://localhost:8080/robot')
+            starfleetcom.postImage('http://localhost:8080/robot',"room_movie.jpg")
+            time.sleep(30)
+            starfleetcom.getCommand('http://localhost:8080/robot')
+            turnBy(180)
+            
+            turnBy(180)
+            startTime=time.time()
+        if time.time()-startTime>2:
+            stop()
+            turnBy(-90)
+            startTime=time.time()
+Communication()
+
+        
